@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌱 Grow A Garden</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            background: #1a1a2e;
+        }
+
+        /* ============ ANIMATED BACKGROUND ============ */
+        .world {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -10;
+            overflow: hidden;
+        }
+
+        .sky {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(180deg, 
+                #4A90C2 0%, 
+                #87CEEB 40%,
+                #B0E0E6 70%,
+                #E8F5E9 100%);
+            transition: background 2s ease;
+        }
+
+        .sky.night {
+            background: linear-gradient(180deg, 
+                #0f0c29 0%, 
+                #302b63 50%,
+                #24243e 100%);
+        }
+
+        .sky.rainy {
+            background: linear-gradient(180deg, 
+                #4a5568 0%, 
+                #718096 40%,
+                #a0aec0 70%,
+                #cbd5e0 100%);
+        }
+
+        .sky.storm {
+            background: linear-gradient(180deg, 
+                #1a202c 0%, 
+                #2d3748 50%,
+                #4a5568 100%);
+        }
+
+        .sun {
+            position: absolute;
+            top: 40px;
+            right: 80px;
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle, #FFE55C, #FFAA00);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 80px #FFE55C,
+                0 0 120px #FFAA0066;
+            animation: pulseSun 4s ease-in-out infinite;
+        }
+
+        @keyframes pulseSun {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.08); filter: brightness(1.1); }
+        }
+
+        .moon {
+            position: absolute;
+            top: 40px;
+            right: 80px;
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 30% 30%, #FFFACD, #F0E68C);
+            border-radius: 50%;
+            box-shadow: 0 0 50px #FFFACD55;
+            display: none;
+        }
+
+        /* Rain Effect */
+        .rain-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none;
+        }
+
+        .rain-container.active {
+            display: block;
+        }
+
+        .rain-drop {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(transparent, #7cb5ec);
+            animation: rain-fall linear infinite;
+        }
+
+        @keyframes rain-fall {
+            0% { transform: translateY(-100%); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        /* Lightning */
+        .lightning {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .lightning.flash {
+            animation: lightning-flash 0.2s ease;
+        }
+
+        @keyframes lightning-flash {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Clouds */
+        .clouds-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            overflow: hidden;
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 100px;
+            opacity: 0.9;
+            animation: moveCloud linear infinite;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .cloud-1 { width: 120px; height: 45px; top: 8%; animation-duration: 45s; }
+        .cloud-1::before { width: 55px; height: 55px; top: -30px; left: 20px; }
+        .cloud-1::after { width: 70px; height: 70px; top: -40px; left: 50px; }
+
+        .cloud-2 { width: 150px; height: 55px; top: 18%; animation-duration: 55s; animation-delay: -15s; }
+        .cloud-2::before { width: 65px; height: 65px; top: -35px; left: 25px; }
+        .cloud-2::after { width: 80px; height: 80px; top: -45px; left: 60px; }
+
+        .cloud-3 { width: 100px; height: 38px; top: 5%; animation-duration: 38s; animation-delay: -25s; }
+        .cloud-3::before { width: 45px; height: 45px; top: -25px; left: 15px; }
+        .cloud-3::after { width: 55px; height: 55px; top: -32px; left: 40px; }
+
+        .cloud-4 { width: 130px; height: 48px; top: 25%; animation-duration: 50s; animation-delay: -8s; }
+        .cloud-4::before { width: 58px; height: 58px; top: -30px; left: 20px; }
+        .cloud-4::after { width: 68px; height: 68px; top: -38px; left: 55px; }
+
+        @keyframes moveCloud {
+            from { left: -200px; }
+            to { left: 110%; }
+        }
+
+        /* Hills & Ground */
+        .hills {
+            position: absolute;
+            bottom: 35%;
+            left: 0;
+            width: 100%;
+            height: 20%;
+        }
+
+        .hill {
+            position: absolute;
+            border-radius: 50% 50% 0 0;
+            background: linear-gradient(180deg, #66BB6A, #4CAF50);
+        }
+
+        .hill-1 { width: 50%; height: 100%; left: -10%; }
+        .hill-2 { width: 60%; height: 120%; left: 30%; background: linear-gradient(180deg, #5CB860, #43A047); }
+        .hill-3 { width: 45%; height: 90%; right: -5%; background: linear-gradient(180deg, #72C276, #52B056); }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(180deg, 
+                #4CAF50 0%, 
+                #388E3C 20%,
+                #2E7D32 50%,
+                #1B5E20 100%);
+        }
+
+        /* Decorations */
+        .deco {
+            position: absolute;
+            z-index: 5;
+            font-size: 2.5em;
+            filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.2));
+        }
+
+        .tree-1 { bottom: 36%; left: 3%; font-size: 4em; }
+        .tree-2 { bottom: 38%; right: 5%; font-size: 3.5em; }
+        .tree-3 { bottom: 35%; left: 12%; font-size: 2.8em; }
+        .tree-4 { bottom: 37%; right: 15%; font-size: 3em; }
+        
+        .flower-1 { bottom: 39%; left: 22%; font-size: 1.6em; animation: sway 3s ease-in-out infinite; }
+        .flower-2 { bottom: 40%; right: 25%; font-size: 1.4em; animation: sway 2.5s ease-in-out infinite 0.5s; }
+        .flower-3 { bottom: 38%; left: 50%; font-size: 1.5em; animation: sway 2.8s ease-in-out infinite 0.3s; }
+        
+        .bee { bottom: 48%; left: 35%; font-size: 1.3em; animation: fly 8s ease-in-out infinite; }
+        .butterfly { bottom: 52%; right: 30%; font-size: 1.4em; animation: flutter 6s ease-in-out infinite; }
+        .bird { top: 15%; left: 20%; font-size: 1.5em; animation: flyBird 12s linear infinite; }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        @keyframes fly {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(60px, -30px); }
+            50% { transform: translate(120px, -10px); }
+            75% { transform: translate(60px, 20px); }
+        }
+
+        @keyframes flutter {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-40px, -20px) rotate(-10deg); }
+            50% { transform: translate(-80px, 0) rotate(0deg); }
+            75% { transform: translate(-40px, 15px) rotate(10deg); }
+        }
+
+        @keyframes flyBird {
+            from { left: -5%; }
+            to { left: 105%; }
+        }
+
+        /* ============ TOP HEADER BAR ============ */
+        .header-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, #5D4037 0%, #4E342E 100%);
+            padding: 8px 15px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border-bottom: 3px solid #3E2723;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .game-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .game-logo .icon {
+            font-size: 1.8em;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .game-logo .title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.4em;
+            color: #FFD54F;
+            text-shadow: 2px 2px 0 #3E2723;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .ctrl-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.1);
+        }
+
+        .ctrl-btn.active {
+            background: #4CAF50;
+            box-shadow: 0 0 15px #4CAF5088;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: rgba(0,0,0,0.3);
+            padding: 6px 14px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-box .stat-icon {
+            font-size: 1.3em;
+        }
+
+        .stat-box .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-box .stat-label {
+            font-size: 0.65em;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-box .stat-value {
+            font-size: 1em;
+            font-weight: 800;
+            color: #FFD54F;
+        }
+
+        .stat-box.money .stat-value { color: #81C784; }
+        .stat-box.credits .stat-value { color: #FFD54F; }
+        .stat-box.level .stat-value { color: #64B5F6; }
+
+        /* XP Bar */
+        .xp-container {
+            flex: 1;
+            min-width: 150px;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 12px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .xp-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7em;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 4px;
+        }
+
+        .xp-bar {
+            height: 10px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7C4DFF, #B388FF);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px #7C4DFF88;
+        }
+
+        /* ============ WEATHER & TIME ============ */
+        .weather-time {
+            position: fixed;
+            top: 95px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .weather-badge, .time-badge {
+            background: rgba(0,0,0,0.6);
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9em;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.15);
+        }
+
+        /* ============ MAIN CONTENT ============ */
+        .main-wrapper {
+            padding: 110px 15px 90px 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============ GARDEN PAGE ============ */
+        .section-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.6em;
+            color: white;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Seed Selector */
+        .seed-bar {
+            background: linear-gradient(180deg, #6D4C41, #5D4037);
+            padding: 12px 15px;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            border: 3px solid #4E342E;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .seed-bar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .seed-bar-title {
+            color: #FFCC80;
+            font-weight: 700;
+            font-size: 0.95em;
+        }
+
+        .seed-count {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85em;
+        }
+
+        .seed-list {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .seed-list::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .seed-list::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        .seed-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 14px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            min-width: 75px;
+            border: 3px solid transparent;
+        }
+
+        .seed-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+        }
+
+        .seed-item.selected {
+            background: rgba(76,175,80,0.4);
+            border-color: #4CAF50;
+            box-shadow: 0 0 15px rgba(76,175,80,0.4);
+        }
+
+        .seed-item .emoji {
+            font-size: 1.8em;
+        }
+
+        .seed-item .name {
+            font-size: 0.7em;
+            color: rgba(255,255,255,0.8);
+            white-space: nowrap;
+        }
+
+        .seed-item .qty {
+            background: #4CAF50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 700;
+        }
+
+        /* Garden Area */
+        .garden-field {
+            background: linear-gradient(180deg, #795548, #5D4037);
+            padding: 20px;
+            border-radius: 25px;
+            border: 5px solid #4E342E;
+            box-shadow: 
+                inset 0 5px 30px rgba(0,0,0,0.4),
+                0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .garden-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 500px) {
+            .garden-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .plot {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #4E342E, #3E2723);
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 4px solid #2E1F14;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 -6px 15px rgba(0,0,0,0.4);
+        }
+
+        .plot::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            background: linear-gradient(145deg, #5D4037, #4E342E);
+            border-radius: 12px;
+            z-index: 0;
+        }
+
+        .plot:hover {
+            transform: scale(1.06);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .plot.locked {
+            background: linear-gradient(145deg, #546E7A, #455A64);
+            cursor: pointer;
+        }
+
+        .plot.locked::before {
+            background: linear-gradient(145deg, #607D8B, #546E7A);
+        }
+
+        .plot .plant-icon {
+            font-size: 2.5em;
+            z-index: 1;
+            filter: drop-shadow(2px 3px 3px rgba(0,0,0,0.4));
+            transition: transform 0.3s;
+        }
+
+        .plot:hover .plant-icon {
+            transform: scale(1.15);
+        }
+
+        .plot .plot-timer {
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.7em;
+            color: white;
+            z-index: 2;
+            font-weight: 600;
+        }
+
+        .plot .plot-progress {
+            position: absolute;
+            bottom: 8px;
+            left: 10%;
+            width: 80%;
+            height: 8px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .plot .plot-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #66BB6A, #43A047);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        .plot.ready {
+            animation: readyGlow 1.2s ease-in-out infinite;
+        }
+
+        .plot.ready .plot-progress-fill {
+            background: linear-gradient(90deg, #FFD700, #FFA000);
+        }
+
+        .plot.ready::after {
+            content: '✨';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1em;
+            animation: sparkle 0.6s ease-in-out infinite;
+            z-index: 3;
+        }
+
+        @keyframes readyGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.6), inset 0 -6px 15px rgba(0,0,0,0.4); }
+            50% { box-shadow: 0 0 25px 8px rgba(255,215,0,0.4), inset 0 -6px 15px rgba(0,0,0,0.4); }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        /* ============ SHOP PAGE ============ */
+        .shop-section {
+            background: linear-gradient(180deg, #6D4C41, #5D4037);
+            padding: 20px;
+            border-radius: 20px;
+            border: 4px solid #4E342E;
+            margin-bottom: 15px;
+        }
+
+        .shop-section-title {
+            color: #FFCC80;
+            font-weight: 800;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+        }
+
+        .shop-card {
+            background: rgba(255,255,255,0.08);
+            padding: 15px 10px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            color: white;
+        }
+
+        .shop-card:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-5px);
+            border-color: #FFD54F;
+        }
+
+        .shop-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .shop-card.locked:hover {
+            transform: none;
+            border-color: transparent;
+        }
+
+        .shop-card .card-emoji {
+            font-size: 2.8em;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .shop-card .card-name {
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .shop-card .card-price {
+            background: #4CAF50;
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85em;
+            display: inline-block;
+        }
+
+        .shop-card .card-qty {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .shop-card .card-level {
+            color: #FFD54F;
+            font-size: 0.75em;
+            margin-top: 5px;
+        }
+
+        /* ============ INVENTORY & SELL PAGE ============ */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .inv-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .inv-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        .inv-item.selected {
+            border-color: #FF9800;
+            background: rgba(255,152,0,0.2);
+        }
+
+        .inv-item .item-emoji {
+            font-size: 2.5em;
+        }
+
+        .inv-item .item-count {
+            background: #FF9800;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85em;
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        .sell-panel {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .sell-info {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .sell-info .sell-price {
+            color: #81C784;
+            font-weight: 800;
+            font-size: 1.3em;
+        }
+
+        .sell-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .qty-btn {
+            background: #5D4037;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .qty-btn:hover {
+            background: #6D4C41;
+            transform: scale(1.1);
+        }
+
+        .qty-display {
+            background: rgba(0,0,0,0.4);
+            padding: 10px 25px;
+            border-radius: 12px;
+            color: #FFD54F;
+            font-size: 1.5em;
+            font-weight: 800;
+            min-width: 80px;
+        }
+
+        .sell-btn {
+            background: linear-gradient(180deg, #FF9800, #F57C00);
+            border: 3px solid #E65100;
+            padding: 12px 30px;
+            border-radius: 15px;
+            color: white;
+            font-weight: 800;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .sell-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255,152,0,0.5);
+        }
+
+        /* ============ REDEEM PAGE ============ */
+        .redeem-box {
+            background: linear-gradient(180deg, #6D4C41, #5D4037);
+            padding: 30px;
+            border-radius: 25px;
+            border: 4px solid #4E342E;
+            text-align: center;
+            color: white;
+        }
+
+        .redeem-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.8em;
+            color: #FFD54F;
+            margin-bottom: 10px;
+        }
+
+        .exchange-info {
+            background: rgba(255,215,0,0.15);
+            padding: 15px 25px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 15px 0;
+            font-size: 1.2em;
+            border: 2px solid #FFD54F;
+        }
+
+        .exchange-info strong {
+            color: #FFD54F;
+        }
+
+        .redeem-form {
+            margin: 25px 0;
+        }
+
+        .redeem-form label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .redeem-input {
+            width: 100%;
+            max-width: 280px;
+            padding: 15px;
+            border-radius: 15px;
+            border: 3px solid #4E342E;
+            background: rgba(0,0,0,0.3);
+            color: white;
+            font-size: 1.4em;
+            text-align: center;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+        }
+
+        .redeem-input:focus {
+            outline: none;
+            border-color: #FFD54F;
+        }
+
+        .redeem-input::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .credit-calc {
+            font-size: 1.4em;
+            color: #81C784;
+            margin: 15px 0;
+            font-weight: 700;
+        }
+
+        .redeem-btn {
+            background: linear-gradient(180deg, #FFD54F, #FFB300);
+            border: 3px solid #FF8F00;
+            padding: 15px 40px;
+            border-radius: 18px;
+            font-size: 1.2em;
+            font-weight: 800;
+            color: #5D4037;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .redeem-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 25px rgba(255,193,7,0.5);
+        }
+
+        .sync-btn {
+            background: linear-gradient(180deg, #2196F3, #1976D2);
+            border: 3px solid #1565C0;
+            padding: 10px 25px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Nunito', sans-serif;
+            margin-bottom: 20px;
+        }
+
+        .sync-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .sync-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .history-title {
+            color: #FFCC80;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-entry {
+            background: rgba(0,0,0,0.25);
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .history-entry .h-code {
+            font-family: 'Courier New', monospace;
+            font-size: 1.15em;
+            color: #81C784;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .history-entry .h-amount {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+        }
+
+        .history-entry .h-credits {
+            color: #FFD54F;
+            font-weight: 700;
+        }
+
+        .history-entry .h-status {
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .history-entry .h-status.pending {
+            background: #FF9800;
+            color: #000;
+        }
+
+        .history-entry .h-status.approved {
+            background: #4CAF50;
+            color: white;
+        }
+
+        /* ============ INFO PAGE ============ */
+        .info-box {
+            background: linear-gradient(180deg, #6D4C41, #5D4037);
+            padding: 25px;
+            border-radius: 20px;
+            border: 4px solid #4E342E;
+            color: white;
+        }
+
+        .info-block {
+            background: rgba(0,0,0,0.2);
+            padding: 18px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+        }
+
+        .info-block h3 {
+            color: #FFD54F;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-block ul {
+            margin-left: 22px;
+        }
+
+        .info-block li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .info-block .highlight {
+            background: rgba(76,175,80,0.2);
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            margin-top: 10px;
+        }
+
+        /* ============ BOTTOM NAV BAR ============ */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(0deg, #3E2723, #4E342E);
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 1000;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.4);
+            border-top: 3px solid #5D4037;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: rgba(255,255,255,0.6);
+            min-width: 60px;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            color: #FFD54F;
+            background: rgba(255,213,79,0.15);
+        }
+
+        .nav-item .nav-icon {
+            font-size: 1.5em;
+            margin-bottom: 3px;
+        }
+
+        .nav-item .nav-label {
+            font-size: 0.7em;
+            font-weight: 700;
+        }
+
+        /* ============ MODAL ============ */
+        .modal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-bg.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: linear-gradient(145deg, #5D4037, #4E342E);
+            padding: 35px;
+            border-radius: 25px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            border: 4px solid #6D4C41;
+            color: white;
+            animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-box h2 {
+            font-family: 'Fredoka One', cursive;
+            color: #FFD54F;
+            font-size: 1.6em;
+            margin-bottom: 15px;
+        }
+
+        .code-box {
+            background: #1a1a1a;
+            padding: 22px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 2.2em;
+            letter-spacing: 6px;
+            color: #4CAF50;
+            margin: 18px 0;
+            border: 3px solid #4CAF50;
+            text-shadow: 0 0 15px #4CAF5088;
+        }
+
+        .modal-note {
+            background: rgba(255,152,0,0.2);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 18px 0;
+            border-left: 4px solid #FF9800;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        .modal-note ol {
+            margin-left: 18px;
+            margin-top: 8px;
+        }
+
+        .modal-note li {
+            margin-bottom: 5px;
+        }
+
+        .modal-close {
+            background: linear-gradient(180deg, #4CAF50, #388E3C);
+            border: 3px solid #2E7D32;
+            padding: 14px 35px;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Nunito', sans-serif;
+            margin-top: 10px;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.05);
+        }
+
+        /* ============ TOAST ============ */
+        .toast-container {
+            position: fixed;
+            top: 110px;
+            right: 15px;
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(0,0,0,0.9);
+            padding: 12px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 2px solid;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success { border-color: #4CAF50; }
+        .toast.error { border-color: #f44336; }
+        .toast.info { border-color: #2196F3; }
+        .toast.warning { border-color: #FF9800; }
+
+        /* ============ FLOATING ANIMATION ============ */
+        .float-anim {
+            position: fixed;
+            pointer-events: none;
+            font-size: 2em;
+            z-index: 1800;
+            animation: floatAway 1.8s ease-out forwards;
+        }
+
+        @keyframes floatAway {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+        }
+
+        /* ============ LOADING ============ */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            transition: opacity 0.5s;
+        }
+
+        .loader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader-spinner {
+            width: 70px;
+            height: 70px;
+            border: 5px solid rgba(255,255,255,0.2);
+            border-top-color: #FFD54F;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            color: white;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 600px) {
+            .stats-row {
+                justify-content: center;
+            }
+            
+            .stat-box {
+                padding: 5px 10px;
+            }
+            
+            .stat-box .stat-label {
+                display: none;
+            }
+            
+            .xp-container {
+                display: none;
+            }
+            
+            .weather-time {
+                top: 75px;
+                right: 10px;
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .weather-badge, .time-badge {
+                padding: 5px 10px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">🌱 Growing your garden...</div>
+    </div>
+
+    <!-- World Background -->
+    <div class="world">
+        <div class="sky" id="sky">
+            <div class="clouds-container">
+                <div class="cloud cloud-1"></div>
+                <div class="cloud cloud-2"></div>
+                <div class="cloud cloud-3"></div>
+                <div class="cloud cloud-4"></div>
+            </div>
+            <div class="sun" id="sun"></div>
+            <div class="moon" id="moon"></div>
+            <div class="rain-container" id="rainContainer"></div>
+            <div class="lightning" id="lightning"></div>
+        </div>
+        <div class="hills">
+            <div class="hill hill-1"></div>
+            <div class="hill hill-2"></div>
+            <div class="hill hill-3"></div>
+        </div>
+        <div class="ground"></div>
+    </div>
+
+    <!-- Decorations -->
+    <div class="deco tree-1">🌳</div>
+    <div class="deco tree-2">🌲</div>
+    <div class="deco tree-3">🌴</div>
+    <div class="deco tree-4">🌳</div>
+    <div class="deco flower-1">🌷</div>
+    <div class="deco flower-2">🌻</div>
+    <div class="deco flower-3">🌺</div>
+    <div class="deco bee">🐝</div>
+    <div class="deco butterfly">🦋</div>
+    <div class="deco bird">🐦</div>
+
+    <!-- Header Bar -->
+    <div class="header-bar">
+        <div class="header-top">
+            <div class="game-logo">
+                <span class="icon">🌱</span>
+                <span class="title">Grow A Garden</span>
+            </div>
+            <div class="header-controls">
+                <button class="ctrl-btn" id="musicToggle" onclick="toggleMusic()">🔇</button>
+                <button class="ctrl-btn" onclick="saveGame()">💾</button>
+            </div>
+        </div>
+        <div class="stats-row">
+            <div class="stat-box money">
+                <span class="stat-icon">💵</span>
+                <div class="stat-info">
+                    <span class="stat-label">Money</span>
+                    <span class="stat-value" id="statMoney">$0.00</span>
+                </div>
+            </div>
+            <div class="stat-box credits">
+                <span class="stat-icon">⭐</span>
+                <div class="stat-info">
+                    <span class="stat-label">Credits</span>
+                    <span class="stat-value" id="statCredits">0</span>
+                </div>
+            </div>
+            <div class="stat-box level">
+                <span class="stat-icon">🏆</span>
+                <div class="stat-info">
+                    <span class="stat-label">Level</span>
+                    <span class="stat-value" id="statLevel">1</span>
+                </div>
+            </div>
+            <div class="xp-container">
+                <div class="xp-header">
+                    <span>EXP</span>
+                    <span id="xpText">0 / 100</span>
+                </div>
+                <div class="xp-bar">
+                    <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather & Time -->
+    <div class="weather-time">
+        <div class="weather-badge" id="weatherBadge">☀️ Sunny</div>
+        <div class="time-badge" id="timeBadge">🌅 Day</div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <!-- Garden Page -->
+        <div class="page active" id="pageGarden">
+            <h1 class="section-title">🏡 My Garden</h1>
+            
+            <div class="seed-bar">
+                <div class="seed-bar-header">
+                    <span class="seed-bar-title">🌰 Select Seed</span>
+                    <span class="seed-count" id="seedCount">0 types</span>
+                </div>
+                <div class="seed-list" id="seedList"></div>
+            </div>
+
+            <div class="garden-field">
+                <div class="garden-grid" id="gardenGrid"></div>
+            </div>
+        </div>
+
+        <!-- Shop Page -->
+        <div class="page" id="pageShop">
+            <h1 class="section-title">🛒 Shop</h1>
+            
+            <div class="shop-section">
+                <div class="shop-section-title">🌱 Seeds</div>
+                <div class="shop-grid" id="shopSeeds"></div>
+            </div>
+
+            <div class="shop-section">
+                <div class="shop-section-title">🏗️ Plots</div>
+                <div class="shop-grid" id="shopPlots"></div>
+            </div>
+        </div>
+
+        <!-- Inventory & Sell Page -->
+        <div class="page" id="pageSell">
+            <h1 class="section-title">📦 Inventory & Sell</h1>
+            
+            <div class="shop-section">
+                <div class="shop-section-title">🌾 Harvested Crops</div>
+                <div class="inventory-grid" id="inventoryGrid"></div>
+                
+                <div class="sell-panel" id="sellPanel" style="display: none;">
+                    <div class="sell-info">
+                        Sell <span id="sellItemName">---</span> for <span class="sell-price" id="sellPrice">$0.00</span> each
+                    </div>
+                    <div class="sell-controls">
+                        <button class="qty-btn" onclick="adjustSellQty(-10)">-10</button>
+                        <button class="qty-btn" onclick="adjustSellQty(-1)">-</button>
+                        <div class="qty-display" id="sellQty">1</div>
+                        <button class="qty-btn" onclick="adjustSellQty(1)">+</button>
+                        <button class="qty-btn" onclick="adjustSellQty(10)">+10</button>
+                    </div>
+                    <div class="sell-info" style="margin-top: 15px;">
+                        Total: <span class="sell-price" id="sellTotal">$0.00</span>
+                    </div>
+                    <button class="sell-btn" onclick="confirmSell()">💰 Sell Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Redeem Page -->
+        <div class="page" id="pageRedeem">
+            <div class="redeem-box">
+                <h1 class="redeem-title">💰 Redeem Credits</h1>
+                <p>Convert your in-game money to real credits!</p>
+                
+                <div class="exchange-info">
+                    <strong>$1.00</strong> = <strong>30 Credits</strong>
+                </div>
+
+                <div class="redeem-form">
+                    <label>Enter amount ($):</label>
+                    <input type="number" class="redeem-input" id="redeemAmt" 
+                        min="0.01" step="0.01" placeholder="0.00" oninput="updateCreditCalc()">
+                    <div class="credit-calc" id="creditCalc">= 0 Credits</div>
+                </div>
+
+                <button class="redeem-btn" onclick="processRedeem()">✨ Generate Code</button>
+
+                <div class="history-section">
+                    <div class="history-title">
+                        <span>📜 Redemption History</span>
+                        <button class="sync-btn" id="syncBtn" onclick="syncStatus()">🔄 Sync Status</button>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <p style="color: rgba(255,255,255,0.5); text-align: center;">No redemptions yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Page -->
+        <div class="page" id="pageInfo">
+            <h1 class="section-title">📖 How To Play</h1>
+            
+            <div class="info-box">
+                <div class="info-block">
+                    <h3>🌱 Planting</h3>
+                    <ul>
+                        <li>Select a seed from the seed bar at top</li>
+                        <li>Click on an empty plot to plant</li>
+                        <li>Watch your plant grow through stages!</li>
+                        <li>Weather affects growth speed</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>🌾 Harvesting</h3>
+                    <ul>
+                        <li>Ready plants glow golden with sparkles ✨</li>
+                        <li>Click to harvest - crops go to inventory</li>
+                        <li>Chance to get bonus seeds!</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>💰 Selling</h3>
+                    <ul>
+                        <li>Go to "Sell" tab to see your inventory</li>
+                        <li>Click a crop, choose quantity, and sell!</li>
+                        <li>Better crops = more money</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>⭐ Credits System</h3>
+                    <div class="highlight">
+                        <strong>Exchange: $1.00 = 30 Credits</strong>
+                        <ol style="margin-top: 10px;">
+                            <li>Go to "Redeem" tab</li>
+                            <li>Enter $ amount to convert</li>
+                            <li>Get a 6-character code</li>
+                            <li><strong>Screenshot the code!</strong></li>
+                            <li>Send screenshot to owner for validation</li>
+                            <li>Click "🔄 Sync Status" to check if approved!</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="info-block">
+                    <h3>🌤️ Weather Effects</h3>
+                    <ul>
+                        <li>☀️ <strong>Sunny:</strong> Normal growth</li>
+                        <li>🌧️ <strong>Rainy:</strong> +50% growth speed!</li>
+                        <li>⛈️ <strong>Storm:</strong> Growth paused</li>
+                        <li>🌙 <strong>Night:</strong> -25% growth speed</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <h3>🏆 Leveling Up</h3>
+                    <ul>
+                        <li>Harvest crops to gain EXP</li>
+                        <li>Higher levels unlock better seeds</li>
+                        <li>Each level needs more EXP</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="switchPage('Garden', this)">
+            <span class="nav-icon">🏡</span>
+            <span class="nav-label">Garden</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('Shop', this)">
+            <span class="nav-icon">🛒</span>
+            <span class="nav-label">Shop</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('Sell', this)">
+            <span class="nav-icon">💰</span>
+            <span class="nav-label">Sell</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('Redeem', this)">
+            <span class="nav-icon">⭐</span>
+            <span class="nav-label">Redeem</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('Info', this)">
+            <span class="nav-icon">📖</span>
+            <span class="nav-label">Info</span>
+        </div>
+    </div>
+
+    <!-- Code Modal -->
+    <div class="modal-bg" id="codeModal">
+        <div class="modal-box">
+            <h2>🎉 Code Generated!</h2>
+            <div class="code-box" id="codeDisplay">------</div>
+            <p id="creditAwarded" style="color: #81C784; font-size: 1.2em; font-weight: 700;"></p>
+            
+            <div class="modal-note">
+                <strong>⚠️ IMPORTANT:</strong>
+                <ol>
+                    <li>Screenshot this code NOW!</li>
+                    <li>Send screenshot to owner</li>
+                    <li>Wait for validation</li>
+                    <li>Click "Sync Status" to check!</li>
+                </ol>
+            </div>
+
+            <button class="modal-close" onclick="closeModal()">✓ I've Saved The Code</button>
+        </div>
+    </div>
+
+    <!-- Audio -->
+    <audio id="bgm" loop></audio>
+    <audio id="sfxHarvest"></audio>
+    <audio id="sfxPlant"></audio>
+    <audio id="sfxSell"></audio>
+    <audio id="sfxBuy"></audio>
+    <audio id="sfxLevelUp"></audio>
+
+    <script>
+        // ==================== CONFIG ====================
+        const CFG = {
+            token: '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',
+            owner: 'GenzPx',
+            repo: 'laughing-parakeet',
+            progressFile: 'Progress.json',
+            codeFile: 'code.json'
+        };
+
+        // ==================== GAME STATE ====================
+        let G = {
+            money: 5.00,
+            credits: 0,
+            level: 1,
+            xp: 0,
+            totalHarvests: 0,
+            plots: [],
+            seeds: { carrot: 10, tomato: 5, lettuce: 3 },
+            inventory: {},
+            redeemHistory: [],
+            selectedSeed: null,
+            unlockedPlots: 6,
+            weather: 'sunny',
+            isNight: false
+        };
+
+        // ==================== PLANTS DATA ====================
+        const PLANTS = {
+            carrot: { emoji: '🥕', name: 'Carrot', stages: ['🌱', '🌿', '🥕'], time: 20000, sellPrice: 0.40, seedPrice: 0.08, seedQty: 5, lvl: 1, xp: 5 },
+            lettuce: { emoji: '🥬', name: 'Lettuce', stages: ['🌱', '🌿', '🥬'], time: 18000, sellPrice: 0.35, seedPrice: 0.07, seedQty: 5, lvl: 1, xp: 4 },
+            potato: { emoji: '🥔', name: 'Potato', stages: ['🌱', '🌿', '🥔'], time: 25000, sellPrice: 0.45, seedPrice: 0.10, seedQty: 4, lvl: 1, xp: 6 },
+            tomato: { emoji: '🍅', name: 'Tomato', stages: ['🌱', '🌿', '🪴', '🍅'], time: 35000, sellPrice: 0.65, seedPrice: 0.18, seedQty: 3, lvl: 2, xp: 10 },
+            corn: { emoji: '🌽', name: 'Corn', stages: ['🌱', '🌿', '🌾', '🌽'], time: 45000, sellPrice: 0.90, seedPrice: 0.25, seedQty: 3, lvl: 2, xp: 12 },
+            onion: { emoji: '🧅', name: 'Onion', stages: ['🌱', '🌿', '🧅'], time: 30000, sellPrice: 0.55, seedPrice: 0.15, seedQty: 4, lvl: 2, xp: 8 },
+            strawberry: { emoji: '🍓', name: 'Strawberry', stages: ['🌱', '🌸', '🍓'], time: 40000, sellPrice: 1.20, seedPrice: 0.40, seedQty: 2, lvl: 3, xp: 15 },
+            pepper: { emoji: '🌶️', name: 'Hot Pepper', stages: ['🌱', '🌿', '🌶️'], time: 38000, sellPrice: 1.00, seedPrice: 0.35, seedQty: 2, lvl: 3, xp: 13 },
+            sunflower: { emoji: '🌻', name: 'Sunflower', stages: ['🌱', '🌿', '🌼', '🌻'], time: 50000, sellPrice: 1.50, seedPrice: 0.50, seedQty: 2, lvl: 3, xp: 18 },
+            pumpkin: { emoji: '🎃', name: 'Pumpkin', stages: ['🌱', '🌿', '🪴', '🎃'], time: 65000, sellPrice: 2.20, seedPrice: 0.60, seedQty: 2, lvl: 4, xp: 25 },
+            eggplant: { emoji: '🍆', name: 'Eggplant', stages: ['🌱', '🌿', '🪴', '🍆'], time: 55000, sellPrice: 1.80, seedPrice: 0.55, seedQty: 2, lvl: 4, xp: 20 },
+            broccoli: { emoji: '🥦', name: 'Broccoli', stages: ['🌱', '🌿', '🥦'], time: 48000, sellPrice: 1.60, seedPrice: 0.48, seedQty: 2, lvl: 4, xp: 18 },
+            watermelon: { emoji: '🍉', name: 'Watermelon', stages: ['🌱', '🌿', '🪴', '🍈', '🍉'], time: 80000, sellPrice: 3.50, seedPrice: 0.90, seedQty: 1, lvl: 5, xp: 35 },
+            melon: { emoji: '🍈', name: 'Melon', stages: ['🌱', '🌿', '🪴', '🍈'], time: 70000, sellPrice: 2.80, seedPrice: 0.75, seedQty: 1, lvl: 5, xp: 30 },
+            grape: { emoji: '🍇', name: 'Grape', stages: ['🌱', '🌿', '🪴', '🍇'], time: 75000, sellPrice: 4.00, seedPrice: 1.10, seedQty: 1, lvl: 6, xp: 40 },
+            peach: { emoji: '🍑', name: 'Peach', stages: ['🌱', '🌳', '🌸', '🍑'], time: 85000, sellPrice: 4.50, seedPrice: 1.30, seedQty: 1, lvl: 6, xp: 45 },
+            cherry: { emoji: '🍒', name: 'Cherry', stages: ['🌱', '🌳', '🌸', '🍒'], time: 90000, sellPrice: 5.50, seedPrice: 1.60, seedQty: 1, lvl: 7, xp: 55 },
+            coconut: { emoji: '🥥', name: 'Coconut', stages: ['🌱', '🌴', '🥥'], time: 100000, sellPrice: 6.00, seedPrice: 1.80, seedQty: 1, lvl: 7, xp: 60 },
+            golden_apple: { emoji: '🍎', name: 'Golden Apple', stages: ['✨', '🌟', '💫', '⭐', '🍎'], time: 120000, sellPrice: 10.00, seedPrice: 3.00, seedQty: 1, lvl: 8, xp: 100 },
+            dragon_fruit: { emoji: '🐉', name: 'Dragon Fruit', stages: ['🌱', '🌵', '🌺', '🐉'], time: 140000, sellPrice: 15.00, seedPrice: 5.00, seedQty: 1, lvl: 9, xp: 150 },
+            crystal_flower: { emoji: '💎', name: 'Crystal Flower', stages: ['💠', '🔮', '💎'], time: 180000, sellPrice: 25.00, seedPrice: 8.00, seedQty: 1, lvl: 10, xp: 250 }
+        };
+
+        // ==================== AUDIO ====================
+        const bgm = document.getElementById('bgm');
+        const sfx = {
+            harvest: document.getElementById('sfxHarvest'),
+            plant: document.getElementById('sfxPlant'),
+            sell: document.getElementById('sfxSell'),
+            buy: document.getElementById('sfxBuy'),
+            levelUp: document.getElementById('sfxLevelUp')
+        };
+
+        bgm.src = 'https://cdn.pixabay.com/audio/2022/10/25/audio_946bc3eb21.mp3';
+        bgm.volume = 0.25;
+
+        sfx.harvest.src = 'https://cdn.pixabay.com/audio/2022/03/15/audio_8cb749bc52.mp3';
+        sfx.plant.src = 'https://cdn.pixabay.com/audio/2022/03/10/audio_d8c167d005.mp3';
+        sfx.sell.src = 'https://cdn.pixabay.com/audio/2022/03/24/audio_4c4c66a35a.mp3';
+        sfx.buy.src = 'https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1e6c2.mp3';
+        sfx.levelUp.src = 'https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3';
+
+        Object.values(sfx).forEach(s => s.volume = 0.4);
+
+        let musicOn = false;
+
+        function toggleMusic() {
+            if (musicOn) {
+                bgm.pause();
+                document.getElementById('musicToggle').textContent = '🔇';
+                document.getElementById('musicToggle').classList.remove('active');
+            } else {
+                bgm.play().catch(() => toast('Click again to play music', 'info'));
+                document.getElementById('musicToggle').textContent = '🔊';
+                document.getElementById('musicToggle').classList.add('active');
+            }
+            musicOn = !musicOn;
+        }
+
+        function playSfx(name) {
+            if (sfx[name]) {
+                sfx[name].currentTime = 0;
+                sfx[name].play().catch(() => {});
+            }
+        }
+
+        // ==================== GITHUB API ====================
+        async function loadGame() {
+            try {
+                const url = `https://api.github.com/repos/${CFG.owner}/${CFG.repo}/contents/${CFG.progressFile}`;
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${CFG.token}` }
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const content = JSON.parse(atob(data.content));
+                    if (content.money !== undefined) {
+                        G = { ...G, ...content };
+                    }
+                }
+            } catch (e) {
+                console.log('New game');
+            }
+        }
+
+        async function saveToGitHub(file, data, msg) {
+            try {
+                const url = `https://api.github.com/repos/${CFG.owner}/${CFG.repo}/contents/${file}`;
+                
+                let sha = '';
+                try {
+                    const getRes = await fetch(url, {
+                        headers: { 'Authorization': `Bearer ${CFG.token}` }
+                    });
+                    if (getRes.ok) {
+                        const fileData = await getRes.json();
+                        sha = fileData.sha;
+                    }
+                } catch (e) {}
+
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+                
+                const res = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${CFG.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: msg,
+                        content: content,
+                        sha: sha || undefined
+                    })
+                });
+
+                return res.ok;
+            } catch (e) {
+                console.error('Save error:', e);
+                return false;
+            }
+        }
+
+        async function saveGame() {
+            toast('Saving...', 'info');
+            const ok = await saveToGitHub(CFG.progressFile, G, `Save ${new Date().toLocaleString()}`);
+            toast(ok ? 'Saved! ✓' : 'Save failed!', ok ? 'success' : 'error');
+        }
+
+        // ==================== SYNC STATUS FROM GITHUB ====================
+        async function syncStatus() {
+            const btn = document.getElementById('syncBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Syncing...';
+
+            try {
+                const url = `https://api.github.com/repos/${CFG.owner}/${CFG.repo}/contents/${CFG.codeFile}`;
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${CFG.token}` },
+                    cache: 'no-store'
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const serverCodes = JSON.parse(atob(data.content));
+
+                    let updated = false;
+                    let creditsAdded = 0;
+
+                    // Update local history with server status
+                    G.redeemHistory.forEach(local => {
+                        const server = serverCodes.find(s => s.code === local.code);
+                        if (server && server.status !== local.status) {
+                            // Status changed!
+                            if (server.status === 'approved' && local.status === 'pending') {
+                                // Credits approved! Add to user
+                                G.credits += local.credits;
+                                creditsAdded += local.credits;
+                                updated = true;
+                            }
+                            local.status = server.status;
+                        }
+                    });
+
+                    renderHistory();
+                    updateStats();
+
+                    if (creditsAdded > 0) {
+                        toast(`🎉 +${creditsAdded} Credits approved!`, 'success');
+                        playSfx('levelUp');
+                        // Save updated credits
+                        await saveToGitHub(CFG.progressFile, G, `Credits approved: +${creditsAdded}`);
+                    } else if (updated) {
+                        toast('Status updated!', 'success');
+                    } else {
+                        toast('Already up to date!', 'info');
+                    }
+                } else {
+                    toast('Sync failed!', 'error');
+                }
+            } catch (e) {
+                console.error('Sync error:', e);
+                toast('Sync error!', 'error');
+            }
+
+            btn.disabled = false;
+            btn.textContent = '🔄 Sync Status';
+        }
+
+        // ==================== NAVIGATION ====================
+        function switchPage(page, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('page' + page).classList.add('active');
+            el.classList.add('active');
+
+            if (page === 'Sell') renderInventory();
+            if (page === 'Shop') renderShop();
+        }
+
+        // ==================== UI UPDATES ====================
+        function updateStats() {
+            document.getElementById('statMoney').textContent = `$${G.money.toFixed(2)}`;
+            document.getElementById('statCredits').textContent = G.credits;
+            document.getElementById('statLevel').textContent = G.level;
+            
+            const reqXP = G.level * 100;
+            const pct = Math.min((G.xp / reqXP) * 100, 100);
+            document.getElementById('xpText').textContent = `${G.xp} / ${reqXP}`;
+            document.getElementById('xpFill').style.width = pct + '%';
+        }
+
+        // ==================== TOAST ====================
+        function toast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            
+            const icons = { success: '✓', error: '✕', info: 'ℹ', warning: '⚠' };
+            t.innerHTML = `<span>${icons[type] || 'ℹ'}</span><span>${msg}</span>`;
+            
+            container.appendChild(t);
+            setTimeout(() => t.classList.add('show'), 10);
+            setTimeout(() => {
+                t.classList.remove('show');
+                setTimeout(() => t.remove(), 400);
+            }, 3000);
+        }
+
+        // ==================== SEEDS ====================
+        function renderSeeds() {
+            const container = document.getElementById('seedList');
+            container.innerHTML = '';
+            
+            let count = 0;
+            for (const [type, qty] of Object.entries(G.seeds)) {
+                if (qty <= 0) continue;
+                const plant = PLANTS[type];
+                if (!plant) continue;
+                
+                count++;
+                const div = document.createElement('div');
+                div.className = 'seed-item' + (G.selectedSeed === type ? ' selected' : '');
+                div.innerHTML = `
+                    <span class="emoji">${plant.emoji}</span>
+                    <span class="name">${plant.name}</span>
+                    <span class="qty">${qty}</span>
+                `;
+                div.onclick = () => {
+                    G.selectedSeed = type;
+                    renderSeeds();
+                    toast(`Selected ${plant.name}`, 'info');
+                };
+                container.appendChild(div);
+            }
+
+            document.getElementById('seedCount').textContent = `${count} types`;
+            
+            if (count === 0) {
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.5); padding: 10px;">No seeds! Buy from Shop.</p>';
+            }
+        }
+
+        // ==================== GARDEN ====================
+        function renderGarden() {
+            const container = document.getElementById('gardenGrid');
+            container.innerHTML = '';
+
+            for (let i = 0; i < 12; i++) {
+                const plot = document.createElement('div');
+                plot.className = 'plot';
+                plot.dataset.idx = i;
+
+                if (i >= G.unlockedPlots) {
+                    plot.classList.add('locked');
+                    plot.innerHTML = '<span class="plant-icon">🔒</span>';
+                    plot.onclick = () => toast('Buy this plot from Shop!', 'warning');
+                } else {
+                    const data = G.plots[i];
+                    
+                    if (data && data.type) {
+                        const plant = PLANTS[data.type];
+                        const elapsed = Date.now() - data.planted;
+                        
+                        let mult = 1;
+                        if (G.weather === 'rainy') mult = 1.5;
+                        if (G.weather === 'storm') mult = 0;
+                        if (G.isNight) mult *= 0.75;
+                        
+                        const adjusted = elapsed * mult;
+                        const progress = Math.min(adjusted / plant.time, 1);
+                        const stageIdx = Math.floor(progress * (plant.stages.length - 1));
+                        const isReady = progress >= 1;
+
+                        if (isReady) plot.classList.add('ready');
+
+                        const timeLeft = Math.max(0, plant.time - adjusted);
+
+                        plot.innerHTML = `
+                            <span class="plot-timer">${isReady ? '✓ Ready!' : formatTime(timeLeft)}</span>
+                            <span class="plant-icon">${plant.stages[stageIdx]}</span>
+                            <div class="plot-progress">
+                                <div class="plot-progress-fill" style="width: ${progress * 100}%"></div>
+                            </div>
+                        `;
+
+                        plot.onclick = () => {
+                            if (isReady) harvestPlot(i);
+                        };
+                    } else {
+                        plot.innerHTML = '<span class="plant-icon">➕</span>';
+                        plot.onclick = () => plantSeed(i);
+                    }
+                }
+
+                container.appendChild(plot);
+            }
+        }
+
+        function plantSeed(idx) {
+            if (!G.selectedSeed) {
+                toast('Select a seed first!', 'warning');
+                return;
+            }
+
+            if (!G.seeds[G.selectedSeed] || G.seeds[G.selectedSeed] <= 0) {
+                toast('No seeds left!', 'error');
+                return;
+            }
+
+            G.seeds[G.selectedSeed]--;
+            G.plots[idx] = {
+                type: G.selectedSeed,
+                planted: Date.now()
+            };
+
+            playSfx('plant');
+            renderSeeds();
+            renderGarden();
+            toast(`Planted ${PLANTS[G.selectedSeed].name}!`, 'success');
+        }
+
+        function harvestPlot(idx) {
+            const data = G.plots[idx];
+            if (!data || !data.type) return;
+
+            const plant = PLANTS[data.type];
+            
+            // Add to inventory
+            G.inventory[data.type] = (G.inventory[data.type] || 0) + 1;
+            G.totalHarvests++;
+            
+            // Add XP
+            G.xp += plant.xp;
+            
+            // Check level up
+            const reqXP = G.level * 100;
+            if (G.xp >= reqXP) {
+                G.level++;
+                G.xp = G.xp - reqXP;
+                playSfx('levelUp');
+                toast(`🎉 LEVEL UP! Now level ${G.level}!`, 'success');
+            }
+
+            // Bonus seeds chance (30%)
+            if (Math.random() < 0.3) {
+                const bonus = Math.floor(Math.random() * 2) + 1;
+                G.seeds[data.type] = (G.seeds[data.type] || 0) + bonus;
+                toast(`+${bonus} bonus ${plant.name} seed(s)!`, 'info');
+            }
+
+            // Clear plot
+            G.plots[idx] = null;
+
+            // Effects
+            playSfx('harvest');
+            floatEmoji(plant.emoji, idx);
+
+            renderSeeds();
+            renderGarden();
+            updateStats();
+            toast(`Harvested ${plant.name}!`, 'success');
+        }
+
+        function floatEmoji(emoji, idx) {
+            const plots = document.querySelectorAll('.plot');
+            const plot = plots[idx];
+            if (!plot) return;
+
+            const rect = plot.getBoundingClientRect();
+            const floater = document.createElement('div');
+            floater.className = 'float-anim';
+            floater.textContent = emoji;
+            floater.style.left = (rect.left + rect.width / 2 - 20) + 'px';
+            floater.style.top = rect.top + 'px';
+            document.body.appendChild(floater);
+            setTimeout(() => floater.remove(), 1800);
+        }
+
+        function formatTime(ms) {
+            const secs = Math.floor(ms / 1000);
+            const mins = Math.floor(secs / 60);
+            const s = secs % 60;
+            return `${mins}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // ==================== SHOP ====================
+        function renderShop() {
+            // Seeds
+            const seedsContainer = document.getElementById('shopSeeds');
+            seedsContainer.innerHTML = '';
+
+            for (const [type, plant] of Object.entries(PLANTS)) {
+                const locked = G.level < plant.lvl;
+                
+                const card = document.createElement('div');
+                card.className = 'shop-card' + (locked ? ' locked' : '');
+                card.innerHTML = `
+                    <span class="card-emoji">${plant.emoji}</span>
+                    <div class="card-name">${plant.name}</div>
+                    <div class="card-price">$${plant.seedPrice.toFixed(2)}</div>
+                    <div class="card-qty">x${plant.seedQty} seeds</div>
+                    ${locked ? `<div class="card-level">🔒 Level ${plant.lvl}</div>` : ''}
+                `;
+
+                if (!locked) {
+                    card.onclick = () => buySeeds(type);
+                }
+
+                seedsContainer.appendChild(card);
+            }
+
+            // Plots
+            const plotsContainer = document.getElementById('shopPlots');
+            plotsContainer.innerHTML = '';
+
+            for (let i = G.unlockedPlots; i < 12; i++) {
+                const price = 2 + (i - 6) * 1.5;
+                
+                const card = document.createElement('div');
+                card.className = 'shop-card';
+                card.innerHTML = `
+                    <span class="card-emoji">🏗️</span>
+                    <div class="card-name">Plot ${i + 1}</div>
+                    <div class="card-price">$${price.toFixed(2)}</div>
+                `;
+                card.onclick = () => buyPlot(i, price);
+                plotsContainer.appendChild(card);
+            }
+
+            if (G.unlockedPlots >= 12) {
+                plotsContainer.innerHTML = '<p style="color: #81C784; text-align: center; padding: 20px; grid-column: 1/-1;">✓ All plots unlocked!</p>';
+            }
+        }
+
+        function buySeeds(type) {
+            const plant = PLANTS[type];
+            
+            if (G.money < plant.seedPrice) {
+                toast('Not enough money!', 'error');
+                return;
+            }
+
+            G.money -= plant.seedPrice;
+            G.seeds[type] = (G.seeds[type] || 0) + plant.seedQty;
+
+            playSfx('buy');
+            renderSeeds();
+            updateStats();
+            toast(`Bought ${plant.seedQty} ${plant.name} seeds!`, 'success');
+        }
+
+        function buyPlot(idx, price) {
+            if (G.money < price) {
+                toast('Not enough money!', 'error');
+                return;
+            }
+
+            G.money -= price;
+            G.unlockedPlots = idx + 1;
+
+            playSfx('buy');
+            renderGarden();
+            renderShop();
+            updateStats();
+            toast('New plot unlocked!', 'success');
+        }
+
+        // ==================== INVENTORY & SELL ====================
+        let sellSelected = null;
+        let sellQty = 1;
+
+        function renderInventory() {
+            const container = document.getElementById('inventoryGrid');
+            container.innerHTML = '';
+
+            let hasItems = false;
+
+            for (const [type, qty] of Object.entries(G.inventory)) {
+                if (qty <= 0) continue;
+                hasItems = true;
+                
+                const plant = PLANTS[type];
+                if (!plant) continue;
+
+                const item = document.createElement('div');
+                item.className = 'inv-item' + (sellSelected === type ? ' selected' : '');
+                item.innerHTML = `
+                    <span class="item-emoji">${plant.emoji}</span>
+                    <span class="item-count">${qty}</span>
+                `;
+                item.onclick = () => selectSellItem(type);
+                container.appendChild(item);
+            }
+
+            if (!hasItems) {
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; grid-column: 1/-1; padding: 30px;">No crops to sell. Harvest some plants first!</p>';
+                document.getElementById('sellPanel').style.display = 'none';
+            }
+        }
+
+        function selectSellItem(type) {
+            sellSelected = type;
+            sellQty = 1;
+            
+            const plant = PLANTS[type];
+            document.getElementById('sellItemName').textContent = plant.emoji + ' ' + plant.name;
+            document.getElementById('sellPrice').textContent = `$${plant.sellPrice.toFixed(2)}`;
+            document.getElementById('sellQty').textContent = sellQty;
+            document.getElementById('sellTotal').textContent = `$${(plant.sellPrice * sellQty).toFixed(2)}`;
+            document.getElementById('sellPanel').style.display = 'block';
+            
+            renderInventory();
+        }
+
+        function adjustSellQty(delta) {
+            if (!sellSelected) return;
+            
+            const maxQty = G.inventory[sellSelected] || 0;
+            sellQty = Math.max(1, Math.min(maxQty, sellQty + delta));
+            
+            const plant = PLANTS[sellSelected];
+            document.getElementById('sellQty').textContent = sellQty;
+            document.getElementById('sellTotal').textContent = `$${(plant.sellPrice * sellQty).toFixed(2)}`;
+        }
+
+        function confirmSell() {
+            if (!sellSelected || sellQty <= 0) return;
+            
+            const plant = PLANTS[sellSelected];
+            const total = plant.sellPrice * sellQty;
+            
+            G.money += total;
+            G.inventory[sellSelected] -= sellQty;
+            
+            if (G.inventory[sellSelected] <= 0) {
+                delete G.inventory[sellSelected];
+                sellSelected = null;
+                document.getElementById('sellPanel').style.display = 'none';
+            }
+
+            playSfx('sell');
+            renderInventory();
+            updateStats();
+            toast(`Sold ${sellQty} ${plant.name} for $${total.toFixed(2)}!`, 'success');
+            
+            sellQty = 1;
+            if (sellSelected) {
+                document.getElementById('sellQty').textContent = sellQty;
+                document.getElementById('sellTotal').textContent = `$${(plant.sellPrice * sellQty).toFixed(2)}`;
+            }
+        }
+
+        // ==================== REDEEM ====================
+        function updateCreditCalc() {
+            const amt = parseFloat(document.getElementById('redeemAmt').value) || 0;
+            const credits = Math.floor(amt * 30);
+            document.getElementById('creditCalc').textContent = `= ${credits} Credits`;
+        }
+
+        async function processRedeem() {
+            const amt = parseFloat(document.getElementById('redeemAmt').value);
+            
+            if (!amt || amt <= 0) {
+                toast('Enter a valid amount!', 'error');
+                return;
+            }
+            
+            if (amt > G.money) {
+                toast('Not enough money!', 'error');
+                return;
+            }
+
+            const credits = Math.floor(amt * 30);
+            const code = generateCode();
+
+            // Deduct money
+            G.money -= amt;
+
+            // Create entry
+            const entry = {
+                code: code,
+                amount: amt,
+                credits: credits,
+                status: 'pending',
+                timestamp: Date.now(),
+                date: new Date().toLocaleString()
+            };
+
+            // Add to history
+            G.redeemHistory.push(entry);
+
+            // Load existing codes from GitHub
+            let codes = [];
+            try {
+                const url = `https://api.github.com/repos/${CFG.owner}/${CFG.repo}/contents/${CFG.codeFile}`;
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${CFG.token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    codes = JSON.parse(atob(data.content));
+                }
+            } catch (e) {
+                codes = [];
+            }
+
+            codes.push(entry);
+
+            // Save codes to GitHub
+            const saved = await saveToGitHub(CFG.codeFile, codes, `Redeem: ${code} - ${credits} credits`);
+
+            if (saved) {
+                // Show modal
+                document.getElementById('codeDisplay').textContent = code;
+                document.getElementById('creditAwarded').textContent = `${credits} Credits Pending`;
+                document.getElementById('codeModal').classList.add('show');
+
+                // Save progress too
+                await saveToGitHub(CFG.progressFile, G, `After redeem: ${code}`);
+
+                updateStats();
+                renderHistory();
+                toast('Code generated! Screenshot it!', 'success');
+            } else {
+                // Refund
+                G.money += amt;
+                G.redeemHistory.pop();
+                toast('Failed to generate code!', 'error');
+            }
+
+            document.getElementById('redeemAmt').value = '';
+            document.getElementById('creditCalc').textContent = '= 0 Credits';
+        }
+
+        function generateCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return code;
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            
+            if (!G.redeemHistory || G.redeemHistory.length === 0) {
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center;">No redemptions yet</p>';
+                return;
+            }
+
+            container.innerHTML = G.redeemHistory.slice().reverse().slice(0, 10).map(r => `
+                <div class="history-entry">
+                    <span class="h-code">${r.code}</span>
+                    <span class="h-amount">$${r.amount.toFixed(2)}</span>
+                    <span class="h-credits">${r.credits} cr</span>
+                    <span class="h-status ${r.status}">${r.status}</span>
+                </div>
+            `).join('');
+        }
+
+        function closeModal() {
+            document.getElementById('codeModal').classList.remove('show');
+        }
+
+        // ==================== WEATHER SYSTEM ====================
+        function updateWeather() {
+            const weathers = [
+                { type: 'sunny', emoji: '☀️', name: 'Sunny', weight: 55 },
+                { type: 'rainy', emoji: '🌧️', name: 'Rainy (+50%)', weight: 30 },
+                { type: 'storm', emoji: '⛈️', name: 'Storm (pause)', weight: 15 }
+            ];
+
+            const total = weathers.reduce((s, w) => s + w.weight, 0);
+            let rand = Math.random() * total;
+
+            for (const w of weathers) {
+                rand -= w.weight;
+                if (rand <= 0) {
+                    G.weather = w.type;
+                    document.getElementById('weatherBadge').textContent = `${w.emoji} ${w.name}`;
+                    
+                    // Update sky
+                    const sky = document.getElementById('sky');
+                    sky.classList.remove('rainy', 'storm');
+                    if (w.type !== 'sunny') {
+                        sky.classList.add(w.type);
+                    }
+                    
+                    // Rain effect
+                    updateRainEffect(w.type);
+                    
+                    // Lightning for storm
+                    if (w.type === 'storm') {
+                        triggerLightning();
+                    }
+                    
+                    break;
+                }
+            }
+        }
+
+        function updateRainEffect(weather) {
+            const rainContainer = document.getElementById('rainContainer');
+            
+            if (weather === 'rainy' || weather === 'storm') {
+                rainContainer.classList.add('active');
+                rainContainer.innerHTML = '';
+                
+                const dropCount = weather === 'storm' ? 100 : 50;
+                
+                for (let i = 0; i < dropCount; i++) {
+                    const drop = document.createElement('div');
+                    drop.className = 'rain-drop';
+                    drop.style.left = Math.random() * 100 + '%';
+                    drop.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
+                    drop.style.animationDelay = Math.random() * 2 + 's';
+                    rainContainer.appendChild(drop);
+                }
+            } else {
+                rainContainer.classList.remove('active');
+                rainContainer.innerHTML = '';
+            }
+        }
+
+        function triggerLightning() {
+            const lightning = document.getElementById('lightning');
+            
+            const flash = () => {
+                if (G.weather !== 'storm') return;
+                
+                lightning.classList.add('flash');
+                setTimeout(() => lightning.classList.remove('flash'), 200);
+                
+                // Random next flash
+                setTimeout(flash, 3000 + Math.random() * 7000);
+            };
+            
+            setTimeout(flash, 1000 + Math.random() * 3000);
+        }
+
+        function updateDayNight() {
+            const hour = new Date().getHours();
+            G.isNight = hour < 6 || hour >= 20;
+
+            const sky = document.getElementById('sky');
+            const sun = document.getElementById('sun');
+            const moon = document.getElementById('moon');
+            const timeBadge = document.getElementById('timeBadge');
+
+            if (G.isNight) {
+                if (G.weather === 'sunny') {
+                    sky.classList.add('night');
+                }
+                sun.style.display = 'none';
+                moon.style.display = 'block';
+                timeBadge.textContent = '🌙 Night (-25%)';
+            } else {
+                sky.classList.remove('night');
+                sun.style.display = G.weather === 'sunny' ? 'block' : 'none';
+                moon.style.display = 'none';
+                timeBadge.textContent = '🌅 Day';
+            }
+        }
+
+        // ==================== GAME LOOP ====================
+        function gameLoop() {
+            renderGarden();
+        }
+
+        // ==================== INITIALIZE ====================
+        async function init() {
+            // Load saved game
+            await loadGame();
+
+            // Initial render
+            renderSeeds();
+            renderGarden();
+            renderShop();
+            renderHistory();
+            updateStats();
+            updateWeather();
+            updateDayNight();
+
+            // Game loop - update garden every second
+            setInterval(gameLoop, 1000);
+
+            // Weather changes every 90 seconds
+            setInterval(updateWeather, 90000);
+
+            // Day/night check every minute
+            setInterval(updateDayNight, 60000);
+
+            // Auto-save every 3 minutes
+            setInterval(() => {
+                saveToGitHub(CFG.progressFile, G, `Auto-save ${new Date().toLocaleString()}`);
+            }, 180000);
+
+            // Auto sync status every 2 minutes
+            setInterval(syncStatus, 120000);
+
+            // Hide loader
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hide');
+            }, 1200);
+        }
+
+        // Modal close on background click
+        document.getElementById('codeModal').onclick = (e) => {
+            if (e.target.id === 'codeModal') closeModal();
+        };
+
+        // Start game
+        init();
+    </script>
+</body>
+</html>
